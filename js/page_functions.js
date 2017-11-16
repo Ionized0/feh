@@ -1,12 +1,20 @@
 function createHeader() {
-	
+	var sHeaderId = "#idHeader";
+	var oHeader = $(sHeaderId);
+	var sTitle = "Fire Emblem Heroes - Data Visualisation";
+	var oTitle = $("<h3>", {
+		html: sTitle,
+		class: "col"
+	});
+	oHeader.append(oTitle);
 }
 
 function createFooter() {
 	var sFooterId = "#idFooter";
 	var oFooter = $(sFooterId);
 
-	var sAuthor = "Jonathan Vukim"
+	// var sAuthor = "Jonathan Vukim;"
+	var sAuthor = "https://github.com/Ionized0/feh_visualisation";
 	var sDate = getFormattedDate();
 	var oAuthor = $("<div>", {
 		html: sAuthor,

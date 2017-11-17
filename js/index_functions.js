@@ -66,8 +66,54 @@ function resetTemplate() {
 	return oTemplate;
 }
 
-// Maps Stat vs. Number of Characters
-function createGraph(oInfo) {
-	var sDefaultStatFilter = "HP";
-	var aAttributeFilters = [];
+// Visualises Stat vs. Number of Characters
+function createGraph(oInfo, sGraphType, sStatFilter, aAttributeFilters) {
+	console.log(oInfo);
+	var sId = "idChart";
+	var oSvg = $("<svg>", {
+		id: sId
+	});
+	$("#idContent").append(oSvg);
+
+	var sGraphType = getGraphType();
+	var sStatFilter = getStatFilter();
+	var aAttributeFilters = getAttributeFilters();
+
+	var margin = {
+		top: 20,
+		right: 30,
+		bottom: 30,
+		left: 40
+	},
+		width = 960 - margin.left - margin.right;
+		height = 500 - margin.top - margin.bottom;
+
+	var x = d3.scaleBand().rangeRound([0, width], 0.1);
+	var y = d3.scaleLinear().range([height, 0]);
+
+	var xAxis = d3.axisBottom()
+		.scale(x);
+
+	var yAxis = d3.axisLeft()
+		.scale(y);
+
+	var oChart = d3.select("#idChart")
+		.attr("width", width + margin.left + margin.right)
+		.attr("height", height + margin.top + margin.bottom)
+		.append("g")
+		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+	var o
+}
+
+function getGraphType() {
+	return "Bar";
+}
+
+function getStatFilter() {
+	return "HP";
+}
+
+function getAttributeFilters() {
+	return [];
 }

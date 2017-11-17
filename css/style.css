@@ -12,7 +12,9 @@
 }
 
 #idContent {
+	margin: 20px;
 	min-height: 500px;
+	background-color: white;
 }
 
 #idFooter {

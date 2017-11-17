@@ -12,8 +12,8 @@
 }
 
 #idContent {
+	min-height: 600px;
 	margin: 20px;
-	min-height: 500px;
 	background-color: white;
 }
 
@@ -23,4 +23,12 @@
 	padding-bottom: 10px;
 	padding-left: 30px;
 	padding-right: 30px;
+}
+
+.bar {
+	fill: purple;
+}
+
+.axisHeading {
+	font-size: 12px;
 }

@@ -2,7 +2,7 @@ function createHeader() {
 	var sHeaderId = "#idHeader";
 	var oHeader = $(sHeaderId);
 	var sTitle = "Fire Emblem Heroes - Data Visualisation";
-	var oTitle = $("<h3>", {
+	var oTitle = $("<h2>", {
 		html: sTitle,
 		class: "col"
 	});

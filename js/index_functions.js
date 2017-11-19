@@ -4,12 +4,61 @@ var sHpParam = "Has Lv40 R5 HP Neut",
 	sDefParam = "Has Lv40 R5 DEF Neut",
 	sResParam = "Has Lv40 R5 RES Neut";
 
+var sNameParam = "HeroName",
+	sWeaponParam = "WeaponType",
+	sMovementParam = "MoveType";
+
+var stats = {
+	"HP": sHpParam,
+	"ATK": sAtkParam,
+	"SPD": sSpdParam,
+	"DEF": sDefParam,
+	"RES": sResParam
+};
+
+var attributes = {
+	"Name": sNameParam,
+	"Weapon Type": sWeaponParam,
+	"Movement Type": sMovementParam
+};
+
+var filterTypes = [
+	"Stats",
+	"Attributes"
+];
+
 function createContent() {
+	createFilterArea();
 	getInfo();
 }
 
-function changeDivText(div_id, text) {
-	$(div_id).html(text);
+function createFilterArea() {
+	// Add both filter areas to content
+	var sFilterAreaClass = "filterArea row";
+	var oFilterHeading = $("<h2>", {
+		html: "Filters"
+	});
+	var oStatFilterArea = $("<div>", {
+		id: "idStatFilters",
+		class: sFilterAreaClass,
+	});
+	var oAttributeFilterArea = $("<div>", {
+		id: "idAttributeFilters",
+		class: sFilterAreaClass
+	});
+	var oContent = $("#idContent");
+	oContent.append(oFilterHeading)
+			.append(oStatFilterArea)
+			.append(oAttributeFilterArea);
+
+	// Stat filter
+	var oStatHeading = $("<h4>", {
+		html: "Stats"
+	});
+	oStatFilterArea.append(oStatHeading);
+	Object.keys(stats).forEach(function (stat) {
+		console.log(stat);
+	});
 }
 
 function getInfo() {
@@ -25,7 +74,6 @@ function getInfo() {
 		dataType: "jsonp",
 		success: function(oData) {
 			oInfo = simplifyInfo(oData.query.results);
-			// TODO: Pass this to another function to visualise data
 			createGraph(oInfo);
 		}
 	});
@@ -37,12 +85,12 @@ function simplifyInfo(oInfo) {
 	Object.keys(oInfo).forEach(function (name) {
 		var oTemplate = resetTemplate();
 		var oCharacterInfo = oTemplate;
+		var sPrintoutPath = oInfo[name]['printouts'];
 		oCharacterInfo.Attributes.Name = name;
-		oCharacterInfo.HP = parseInt(oInfo[name]['printouts'][sHpParam][0]);
-		oCharacterInfo.ATK = parseInt(oInfo[name]['printouts'][sAtkParam][0]);
-		oCharacterInfo.SPD = parseInt(oInfo[name]['printouts'][sSpdParam][0]);
-		oCharacterInfo.DEF = parseInt(oInfo[name]['printouts'][sDefParam][0]);
-		oCharacterInfo.RES = parseInt(oInfo[name]['printouts'][sResParam][0]);
+		// Add stats to oCharacterInfo
+		Object.keys(stats).forEach(function (stat) {
+			oCharacterInfo[stat] = parseInt(sPrintoutPath[stats[stat]][0]);
+		});
 		oCharacterInfo.BST = oCharacterInfo.HP + oCharacterInfo.ATK + oCharacterInfo.SPD + oCharacterInfo.DEF + oCharacterInfo.RES;
 		if (oCharacterInfo.RES) {
 			oSimplifiedInfo.push(oCharacterInfo);
@@ -180,4 +228,8 @@ function getXDomain(oDataset) {
 		aMap.push(entry.x);
 	});
 	return aMap.sort();
+}
+
+function _redraw() {
+
 }

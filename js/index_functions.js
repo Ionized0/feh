@@ -78,8 +78,8 @@ function createGraph(oInfo, sGraphType, sStatFilter, aAttributeFilters) {
 	var margin = {
 		top: 20,
 		right: 30,
-		bottom: 30,
-		left: 40
+		bottom: 50,		// 30
+		left: 60		// 40
 	},
 		width = oContent[0].clientWidth - margin.left - margin.right;
 		height = oContent[0].clientHeight - margin.top - margin.bottom;
@@ -113,7 +113,12 @@ function createGraph(oInfo, sGraphType, sStatFilter, aAttributeFilters) {
 	oChart.append("g")
 		.attr("class", "x axis")
 		.attr("transform", "translate(0," + height + ")")
-		.call(d3.axisBottom(x));
+		.call(d3.axisBottom(x))
+		.append("text")
+		.attr("class", "axisHeading")
+		.attr("x", (width) / 2)
+		.attr("dy", margin.bottom / 2 + 18 / 2)		// TODO: Un-hardcode
+		.text(sStatFilter);
 
 	oChart.append("g")
 		.attr("class", "y axis")
@@ -122,8 +127,12 @@ function createGraph(oInfo, sGraphType, sStatFilter, aAttributeFilters) {
 		.attr("class", "axisHeading")
 		.attr("transform", "rotate(-90)")
 		.attr("y", 6)
+		.attr("dy", ".71em")
 		.style("text-anchor", "end")
 		.text("Number of Heroes");
+
+	var axisFontSize = $(".axisHeading").css("font-size");
+	console.log(axisFontSize);
 }
 
 function getGraphType() {

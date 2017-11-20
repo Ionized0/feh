@@ -47,9 +47,9 @@ function createFilterArea() {
 		class: sFilterAreaClass
 	});
 	var oContent = $("#idContent");
-	oContent.append(oFilterHeading)
-			.append(oStatFilterArea)
-			.append(oAttributeFilterArea);
+	oContent.append(oFilterHeading);
+	oContent.append(oStatFilterArea);
+	oContent.append(oAttributeFilterArea);
 
 	// Stat filter
 	var oStatHeading = $("<h4>", {

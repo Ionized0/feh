@@ -313,6 +313,7 @@ function configureDataset(oInfo, sGraphType, aStatFilters, aAttributeFilters) {
 								};
 								oNewObj.y[stat] = 1;
 								oDataset.push(oNewObj);
+								break;
 							}
 						}
 					}

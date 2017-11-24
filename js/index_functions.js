@@ -212,13 +212,19 @@ function createGraph(oInfo) {
 			.attr("class", "bar " + sStatFilter)
 			.style("fill", oColours[sStatFilter])
 			.attr("x", function (d) { return x(d.x) + dx; })
-			.attr("y", function (d) { return y(d.y[sStatFilter]); })
-			.attr("height", function (d) { return height - y(d.y[sStatFilter]); })
+			.attr("y", function (d) { return height; })
 			.attr("width", oBarLength)
+			.transition()
+			.duration(250)
+			.delay(function (d, i) {
+				return i * 50;
+			})
+			.attr("y", function (d) { return d.y[sStatFilter] ? y(d.y[sStatFilter]) : 0; })
+			.attr("height", function (d) { return d.y[sStatFilter] ? height - y(d.y[sStatFilter]) : 0; })
 	});
 
 	var xAxisText = getXAxisString(aStatFilters);
-	var axisFontSize = $(".axisHeading").css("font-size");
+	var axisFontSize = 18;	// TODO: Un-hardcode
 	oChart.append("g")
 		.attr("class", "x axis")
 		.attr("transform", "translate(0," + height + ")")
@@ -226,7 +232,7 @@ function createGraph(oInfo) {
 		.append("text")
 		.attr("class", "axisHeading")
 		.attr("x", (width) / 2)
-		.attr("dy", margin.bottom / 2 + 18 / 2)		// TODO: Un-hardcode
+		.attr("dy", margin.bottom / 2 + axisFontSize / 2)
 		.text(xAxisText);
 
 	oChart.append("g")
@@ -319,8 +325,24 @@ function configureDataset(oInfo, sGraphType, aStatFilters, aAttributeFilters) {
 					}
 				});
 			});
+			oDataset = sortDataset(oDataset);
 			return oDataset;
 	}
+}
+
+function sortDataset(oDataset) {
+	for (var i = 0; i < oDataset.length - 1; i++) {
+		for (var j = 0; j < oDataset.length -1; j++) {
+			if (oDataset[j].x > oDataset[j + 1].x) {
+				var prev = oDataset[j];
+				var next = oDataset[j + 1];
+				oDataset[j] = next;
+				oDataset[j + 1] = prev;
+			}
+		}
+	}
+	console.log(oDataset);
+	return oDataset;
 }
 
 function changeStat(sStat) {

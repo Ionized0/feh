@@ -36,6 +36,16 @@ span.label {
 	padding-right: 20px;
 }
 
+div.tooltip {
+	position: absolute;
+	text-align: center;
+	min-width: 110px;
+	min-height: 25px;
+	padding: 10px;
+	background: lightsteelblue;
+	font: 12px;
+}
+
 .bar {
 	fill: purple;
 }

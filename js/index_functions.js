@@ -201,11 +201,14 @@ function createGraph(oInfo) {
 	var yDomain = getYDomain(oDataset);
 	x.domain(xDomain);
 	y.domain(yDomain);
+	
+	var yTooltipOffset = 25;
 
 	var iNumStatFilters = aStatFilters.length;
 	var oBarLength = x.bandwidth() / iNumStatFilters;
 	var oBars = oChart.selectAll(".bar")
 		.data(oDataset);
+
 	aStatFilters.forEach(function (sStatFilter, index) {
 		var dx = index * oBarLength;
 		oBars.enter().append("rect")
@@ -214,13 +217,33 @@ function createGraph(oInfo) {
 			.attr("x", function (d) { return x(d.x) + dx; })
 			.attr("y", function (d) { return height; })
 			.attr("width", oBarLength)
+			.on("mouseover", function (d) {
+				var oTooltip = d3.select("#idContent").append("div")
+					.attr("class", "tooltip")
+					.style("opacity", 0);
+				oTooltip.transition()
+					.duration(200)
+					.style("opacity", 0.9);
+				var sHtmlCharacterString = getHtmlCharacterString(d, sStatFilter);
+				oTooltip.html("<b>" + d.y[sStatFilter].length + " character(s) with " + d.x + " " + sStatFilter + "</b><br/>" + sHtmlCharacterString)
+					.style("left", x(d.x) + margin.left + (0.7 * $(".tooltip")[0].clientWidth) + "px")	// Tooltip offset calculated on the fly
+					.style("top", y(d.y[sStatFilter].length) + margin.top + $("#idStatFilters")[0].clientHeight + $("#idHeader")[0].clientHeight
+						+ yTooltipOffset + "px");
+			})
+			.on("mouseout", function (d) {
+				var oTooltip = d3.selectAll(".tooltip");
+				oTooltip.transition()
+					.duration(500)
+					.style("opacity", 0)
+					.remove();
+			})
 			.transition()
 			.duration(250)
 			.delay(function (d, i) {
 				return i * 50;
 			})
-			.attr("y", function (d) { return d.y[sStatFilter] ? y(d.y[sStatFilter]) : 0; })
-			.attr("height", function (d) { return d.y[sStatFilter] ? height - y(d.y[sStatFilter]) : 0; })
+			.attr("y", function (d) { return d.y[sStatFilter] ? y(d.y[sStatFilter].length) : 0; })
+			.attr("height", function (d) { return d.y[sStatFilter] ? height - y(d.y[sStatFilter].length) : 0; })
 	});
 
 	var xAxisText = getXAxisString(aStatFilters);
@@ -246,6 +269,16 @@ function createGraph(oInfo) {
 		.style("text-anchor", "end")
 		.text("Number of Heroes");
 
+}
+
+function getHtmlCharacterString(object, stat) {
+	var sHtmlCharacterString = "";
+
+	object.y[stat].forEach(function (name) {
+		sHtmlCharacterString += name + "<br/>";
+	});
+
+	return sHtmlCharacterString;
 }
 
 function getXAxisString(aStatFilters) {
@@ -292,7 +325,7 @@ function configureDataset(oInfo, sGraphType, aStatFilters, aAttributeFilters) {
 	oDataset.push({
 		x: oInfo[0]["Stats"][sStatFilter],
 		y: {
-			"HP": 1
+			"HP": [oInfo[0]["Attributes"]["Name"]]
 		}
 	});
 	switch(sGraphType) {
@@ -303,12 +336,12 @@ function configureDataset(oInfo, sGraphType, aStatFilters, aAttributeFilters) {
 						for (var i = 0; i < oDataset.length; i++) {
 							// If xValue exists and yValue exists
 							if (character["Stats"][stat] == oDataset[i].x && oDataset[i].y[stat]) {
-								oDataset[i].y[stat]++;
+								oDataset[i].y[stat].push(character["Attributes"]["Name"]);
 								break;
 							}
 							// If xValue exists but yValue does not exist
 							else if (character["Stats"][stat] == oDataset[i].x) {
-								oDataset[i].y[stat] = 1;
+								oDataset[i].y[stat] = [character["Attributes"]["Name"]];
 								break;
 							}
 							// If xValue does not exist and at the end of loop
@@ -317,7 +350,7 @@ function configureDataset(oInfo, sGraphType, aStatFilters, aAttributeFilters) {
 									x: character["Stats"][stat],
 									y: {}
 								};
-								oNewObj.y[stat] = 1;
+								oNewObj.y[stat] = [character["Attributes"]["Name"]];
 								oDataset.push(oNewObj);
 								break;
 							}
@@ -364,8 +397,12 @@ function changeAttribute() {
 
 function getXDomain(oDataset) {
 	var aMap = [];
+	var highestX = 0;
 	oDataset.forEach(function (entry) {
 		aMap.push(entry.x);
+		if(entry.x > highestX) {
+			highestX = entry.x;
+		}
 	});
 	return aMap.sort();
 }
@@ -375,8 +412,8 @@ function getYDomain(oDataset) {
 	var maxValue = 0;
 	oDataset.forEach(function (stat) {
 		Object.keys(stat.y).forEach(function (sStatFilter) {
-			if (stat.y[sStatFilter] > maxValue) {
-				maxValue = stat.y[sStatFilter];
+			if (stat.y[sStatFilter].length > maxValue) {
+				maxValue = stat.y[sStatFilter].length;
 			}
 		});
 	})

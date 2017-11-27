@@ -374,7 +374,6 @@ function sortDataset(oDataset) {
 			}
 		}
 	}
-	console.log(oDataset);
 	return oDataset;
 }
 
@@ -423,7 +422,6 @@ function getYDomain(oDataset) {
 function redraw() {
 	$("svg").remove();
 	createGraph(oFetchedInfo);
-	getStatFilters();
 }
 
 $(window).resize(function() {

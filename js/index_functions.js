@@ -169,6 +169,7 @@ function resetTemplate() {
 
 // Visualises Stat vs. Number of Characters
 function createGraph(oInfo) {
+	disableFilters();
 	if (!oInfo) {
 		return 0;
 	}
@@ -230,7 +231,10 @@ function createGraph(oInfo) {
 	var oExistingBars = d3.selectAll(".Bar");
 	oExistingBars
 		.transition()
-		.duration(1000)
+		.duration(500)
+		.delay(function (d, i) {
+			return i * 50;
+		})
 		.attr("class", function (d, i) {
 			if (i > oDataset.length - 1) {
 				return "Remove";
@@ -239,11 +243,10 @@ function createGraph(oInfo) {
 		})
 		.style("fill", function (d) { return oColours[d.stat]; })
 		.attr("x", function (d) { 
-			var val = x(d.x) ? x(d.x) + (calcDx(d.stat, oBarLength)) : null;
+			var val = x(d.x) ? x(d.x) + (calcDx(d.stat, oBarLength)) : x(d3.max(xDomain));
 			if (val) {
 				return val;
 			}
-			return x(d3.max(xDomain));
 		})
 		.attr("y", function (d, i) {
 			if (i > oDataset.length - 1) {
@@ -262,8 +265,14 @@ function createGraph(oInfo) {
 				return 0;
 			}
 			return oBarLength;
-		});
-	oExistingBars.selectAll(".Remove").remove();
+		})
+		.filter(function (d) {
+			console.log(d3.select(this));
+			return d3.select(this).classed("Remove");
+		})
+		.remove();
+	// oExistingBars.selectAll(".Remove").remove();
+	enableFilters();
 
 	// Add new bars
 	oBars.enter().append("rect")
@@ -294,9 +303,11 @@ function createGraph(oInfo) {
 		})
 		.transition()
 		.duration(function (d) {
-			return 1000;
+			return 500;
 		})
-		.delay(500)
+		.delay(function (d, i) {
+			return i * 50;
+		})
 		.attr("y", function (d) { return d.characters ? y(d.characters.length) : 0; })
 		.attr("height", function (d) { return d.characters ? height - y(d.characters.length) : 0; })
 
@@ -486,3 +497,13 @@ $(window).resize(function() {
 	$("svg").remove();
 	createGraph(oFetchedInfo);
 });
+
+function disableFilters() {
+	d3.selectAll("input")
+		.attr("disabled", true);
+}
+
+function enableFilters() {
+	d3.selectAll("input")
+		.attr("disabled", null);
+}

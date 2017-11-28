@@ -216,31 +216,6 @@ function createGraph(oInfo) {
 	var yDomain = getYDomain(oDataset);
 	x.domain(xDomain);
 	y.domain(yDomain);
-
-	var xAxisText = getXAxisString(aStatFilters);
-	var axisFontSize = 18;	// TODO: Un-hardcode
-
-	oChart.selectAll("g .axis").remove();
-	oChart.append("g")
-		.attr("class", "x axis")
-		.attr("transform", "translate(0," + height + ")")
-		.call(d3.axisBottom(x))
-		.append("text")
-		.attr("class", "axisHeading")
-		.attr("x", (width) / 2)
-		.attr("dy", margin.bottom / 2 + axisFontSize / 2)
-		.text(xAxisText);
-
-	oChart.append("g")
-		.attr("class", "y axis")
-		.call(d3.axisLeft(y))
-		.append("text")
-		.attr("class", "axisHeading")
-		.attr("transform", "rotate(-90)")
-		.attr("y", 6)
-		.attr("dy", ".71em")
-		.style("text-anchor", "end")
-		.text("Number of Heroes");
 	
 	var yTooltipOffset = 25;
 
@@ -248,6 +223,7 @@ function createGraph(oInfo) {
 	var oBarLength = x.bandwidth() / iNumStatFilters;
 	var oBars = oChart.selectAll(".Bar")
 		.data(oDataset);
+	console.log(oDataset);
 
 	aUniqueStats = [];
 
@@ -263,9 +239,25 @@ function createGraph(oInfo) {
 			return "Bar " + d.stat;
 		})
 		.style("fill", function (d) { return oColours[d.stat]; })
-		.attr("x", function (d) { return x(d.x) + (calcDx(d.stat, oBarLength)); })
-		.attr("y", function (d) { return d.characters ? y(d.characters.length) : 0; })
-		.attr("height", function (d) { return d.characters ? height - y(d.characters.length) : 0; })
+		.attr("x", function (d) { 
+			var val = x(d.x) ? x(d.x) + (calcDx(d.stat, oBarLength)) : null;
+			if (val) {
+				return val;
+			}
+			return x(d3.max(xDomain));
+		})
+		.attr("y", function (d, i) {
+			if (i > oDataset.length - 1) {
+				return height;
+			}
+			return d.characters ? y(d.characters.length) : 0;
+		})
+		.attr("height", function (d, i) {
+			if (i > oDataset.length - 1) {
+				return 0;
+			}
+			return d.characters ? height - y(d.characters.length) : 0;
+		})
 		.attr("width", function (d, i) {
 			if (i > oDataset.length - 1) {
 				return 0;
@@ -305,11 +297,34 @@ function createGraph(oInfo) {
 		.duration(function (d) {
 			return 1000;
 		})
-		// .delay(function (d, i) {
-		// 	return i * 50;
-		// })
+		.delay(500)
 		.attr("y", function (d) { return d.characters ? y(d.characters.length) : 0; })
 		.attr("height", function (d) { return d.characters ? height - y(d.characters.length) : 0; })
+
+	var xAxisText = getXAxisString(aStatFilters);
+	var axisFontSize = 18;	// TODO: Un-hardcode
+
+	oChart.selectAll("g .axis").remove();
+	oChart.append("g")
+		.attr("class", "x axis")
+		.attr("transform", "translate(0," + height + ")")
+		.call(d3.axisBottom(x))
+		.append("text")
+		.attr("class", "axisHeading")
+		.attr("x", (width) / 2)
+		.attr("dy", margin.bottom / 2 + axisFontSize / 2)
+		.text(xAxisText);
+
+	oChart.append("g")
+		.attr("class", "y axis")
+		.call(d3.axisLeft(y))
+		.append("text")
+		.attr("class", "axisHeading")
+		.attr("transform", "rotate(-90)")
+		.attr("y", 6)
+		.attr("dy", ".71em")
+		.style("text-anchor", "end")
+		.text("Number of Heroes");
 }
 
 function calcDx(stat, oBarLength) {

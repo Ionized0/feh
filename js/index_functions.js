@@ -223,7 +223,6 @@ function createGraph(oInfo) {
 	var oBarLength = x.bandwidth() / iNumStatFilters;
 	var oBars = oChart.selectAll(".Bar")
 		.data(oDataset);
-	console.log(oDataset);
 
 	aUniqueStats = [];
 

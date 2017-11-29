@@ -39,7 +39,7 @@ span.label {
 div.tooltip {
 	position: absolute;
 	text-align: center;
-	min-width: 110px;
+	max-width: 200px;
 	min-height: 25px;
 	padding: 10px;
 	background: lightsteelblue;

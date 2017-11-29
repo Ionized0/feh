@@ -41,6 +41,9 @@ var filterTypes = [
 
 var oFetchedInfo;
 
+var iTransitionTime = 500,	// Milliseconds
+	iTransitionDelay = 50;	// Milliseconds
+
 function createContent() {
 	createFilterArea();
 	getInfo();
@@ -93,7 +96,8 @@ function createFilterArea() {
 			type: "checkbox",
 			name: "stat",
 			value: stat,
-			checked: checked
+			checked: checked,
+			disabled: true
 		}).click(function () {
 			changeStat(stat);
 		});
@@ -169,15 +173,17 @@ function resetTemplate() {
 
 // Visualises Stat vs. Number of Characters
 function createGraph(oInfo) {
-	disableFilters();
+	var sGraphType = getGraphType();
+	var aStatFilters = getStatFilters();
+	var aAttributeFilters = getAttributeFilters();
+	var oDataset = configureDataset(oInfo, sGraphType, aStatFilters, aAttributeFilters);
+
+	var iTimeToDisable = (oDataset.length + d3.selectAll(".Bars").size()) * iTransitionDelay;
+	disableFilters(iTimeToDisable);
 	if (!oInfo) {
 		return 0;
 	}
 	var oContent = $("#idContent");
-
-	var sGraphType = getGraphType();
-	var aStatFilters = getStatFilters();
-	var aAttributeFilters = getAttributeFilters();
 
 	var margin = {
 		top: 20,
@@ -210,9 +216,6 @@ function createGraph(oInfo) {
 		.padding(0.1);
 	y = d3.scaleLinear().range([height, 0]);
 
-
-	var oDataset = configureDataset(oInfo, sGraphType, aStatFilters, aAttributeFilters);
-
 	var xDomain = getXDomain(oDataset);
 	var yDomain = getYDomain(oDataset);
 	x.domain(xDomain);
@@ -231,9 +234,9 @@ function createGraph(oInfo) {
 	var oExistingBars = d3.selectAll(".Bar");
 	oExistingBars
 		.transition()
-		.duration(500)
+		.duration(iTransitionTime)
 		.delay(function (d, i) {
-			return i * 50;
+			return i * iTransitionDelay;
 		})
 		.attr("class", function (d, i) {
 			if (i > oDataset.length - 1) {
@@ -241,7 +244,12 @@ function createGraph(oInfo) {
 			}
 			return "Bar " + d.stat;
 		})
-		.style("fill", function (d) { return oColours[d.stat]; })
+		.style("fill", function (d, i) {
+			if (i > oDataset.length - 1) {
+				return "white";
+			}
+			return oColours[d.stat]; 
+		})
 		.attr("x", function (d) { 
 			var val = x(d.x) ? x(d.x) + (calcDx(d.stat, oBarLength)) : x(d3.max(xDomain));
 			if (val) {
@@ -266,13 +274,11 @@ function createGraph(oInfo) {
 			}
 			return oBarLength;
 		})
-		.filter(function (d) {
-			console.log(d3.select(this));
-			return d3.select(this).classed("Remove");
+		.filter(function (d, i) {
+			return i > oDataset.length - 1;
 		})
-		.remove();
-	// oExistingBars.selectAll(".Remove").remove();
-	enableFilters();
+		.remove(function () {
+		});
 
 	// Add new bars
 	oBars.enter().append("rect")
@@ -303,10 +309,10 @@ function createGraph(oInfo) {
 		})
 		.transition()
 		.duration(function (d) {
-			return 500;
+			return iTransitionTime;
 		})
 		.delay(function (d, i) {
-			return i * 50;
+			return i * iTransitionDelay;
 		})
 		.attr("y", function (d) { return d.characters ? y(d.characters.length) : 0; })
 		.attr("height", function (d) { return d.characters ? height - y(d.characters.length) : 0; })
@@ -498,12 +504,11 @@ $(window).resize(function() {
 	createGraph(oFetchedInfo);
 });
 
-function disableFilters() {
+function disableFilters(iTimeToDisable) {
 	d3.selectAll("input")
 		.attr("disabled", true);
-}
-
-function enableFilters() {
-	d3.selectAll("input")
-		.attr("disabled", null);
+	setTimeout(function () {
+		d3.selectAll("input")
+			.attr("disabled", null);
+	}, iTimeToDisable);
 }

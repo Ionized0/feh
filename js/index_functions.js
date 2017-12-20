@@ -24,20 +24,21 @@ var stats = {
 	"RES": sResParam
 };
 
+var aChartTypes = [
+	"Bar",
+	"Scatterplot"
+];
+
 aUniqueStats = [];
 
 var aDefaultSelectedStats = ["HP"];
+var sDefaultSelectedChart = "Bar";
 
 var attributes = {
 	"Name": sNameParam,
 	"Weapon Type": sWeaponParam,
 	"Movement Type": sMovementParam
 };
-
-var filterTypes = [
-	"Stats",
-	"Attributes"
-];
 
 var oFetchedInfo;
 
@@ -72,6 +73,36 @@ function createFilterArea() {
 	oContent.append(oStatFilterArea);
 	oContent.append(oAttributeFilterArea);
 	oContentArea.append(oContent);
+
+	// Chart filter
+	var oChartFilterContainer = $("<div>", {
+		class: "container"
+	});
+	var oChartContainerHeading = $("<h4>", {
+		html: "Chart Type",
+		class: "row"
+	});
+	var oChartFilters = $("<div>", {
+		class: "row"
+	});
+
+	aChartTypes.forEach(function (chart) {
+		var checked = false;
+		if (sDefaultSelectedChart == chart) {
+			var checked = true;
+		}
+		var oRadioButtonContainer = $("<div>");
+		var oChartTypeRadioButton = $("<input>", {
+			class: "radiobutton",
+			type: "radio",
+			name: "chart",
+			value: chart,
+			checked: checked,
+			disabled: true
+		}).click(function () {
+			changeChart(chart);
+		});
+	});
 
 	// Stat filter
 	var oStatFilterContainer = $("<div>", {
@@ -127,11 +158,24 @@ function getInfo() {
 		crossDomain: true,
 		dataType: "jsonp",
 		success: function(oData) {
+			oData.query.results = validateInfo(oData.query.results);
 			oInfo = simplifyInfo(oData.query.results);
 			oFetchedInfo = oInfo;
 			createGraph(oFetchedInfo);
+		},
+		error: function() {
+			showError();
 		}
 	});
+}
+
+function showError() {
+	var oContent = d3.select("#idContent");
+
+	var oErrorDiv = $("<div>", {
+		innerHTML: "Error: Failed to make data request. Please check to see if https://feheroes.gamepedia.com responds."
+	});
+	oContent.append(oErrorDiv);
 }
 
 function simplifyInfo(oInfo) {
@@ -468,6 +512,10 @@ function changeStat(sStat) {
 	redraw();
 }
 
+function changeChart(sChart) {
+	
+}
+
 function changeAttribute() {
 
 }
@@ -496,12 +544,16 @@ function getYDomain(oDataset) {
 }
 
 function redraw() {
-	createGraph(oFetchedInfo);
+	if (oFetchedInfo) {
+		createGraph(oFetchedInfo);
+	}
 }
 
 $(window).resize(function() {
 	$("svg").remove();
-	createGraph(oFetchedInfo);
+	if (oFetchedInfo) {
+		createGraph(oFetchedInfo);
+	}
 });
 
 function disableFilters(iTimeToDisable) {
@@ -511,4 +563,26 @@ function disableFilters(iTimeToDisable) {
 		d3.selectAll("input")
 			.attr("disabled", null);
 	}, iTimeToDisable);
+}
+
+function validateInfo(oResults) {
+	if (!oResults.Abel.printouts["Has Lv40 R5 HP Neut"][0]) {
+		// Create dummy data
+		Object.keys(oResults).forEach(function (hero) {
+			Object.keys(oResults[hero].printouts).forEach(function (stat) {
+				oResults[hero].printouts[stat] = [Math.floor((Math.random() * 40) + 30)];
+			});
+		});
+		// Display info disclaimer
+		displayDisclaimer();
+	}
+	return oResults;
+}
+
+function displayDisclaimer() {
+	var oDisclaimerHeading = $("<h5>", {
+		html: "Disclaimer: The information below is dummy data created on the fly because the wiki APIs are either unresponsive or sending back blank data. This is not real data.",
+		class: "mx-auto"
+	});
+	$("#idHeader").append($("<br/>")).append(oDisclaimerHeading);
 }

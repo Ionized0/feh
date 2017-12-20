@@ -4,7 +4,7 @@ function createHeader() {
 	var sTitle = "Fire Emblem Heroes - Data Visualisation";
 	var oTitle = $("<h2>", {
 		html: sTitle,
-		class: "col"
+		class: "mx-auto"
 	});
 	oHeader.append(oTitle);
 }

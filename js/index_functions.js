@@ -1,3 +1,38 @@
+var oDummyResults = {
+	Ike : {
+	},
+	Lyn: {
+	},
+	Hector: {
+	},
+	Abel: {
+	},
+	Lucina: {
+	},
+	Marth: {
+	},
+	Robin: {
+	},
+	Corrin: {
+	},
+	Ike2 : {
+	},
+	Lyn: {
+	},
+	Hector2: {
+	},
+	Abel2: {
+	},
+	Lucina2: {
+	},
+	Marth2: {
+	},
+	Robin2: {
+	},
+	Corrin2: {
+	}
+};
+
 var sHpParam = "Has Lv40 R5 HP Neut",
 	sAtkParam = "Has Lv40 R5 ATK Neut",
 	sSpdParam = "Has Lv40 R5 SPD Neut",
@@ -158,10 +193,17 @@ function getInfo() {
 		crossDomain: true,
 		dataType: "jsonp",
 		success: function(oData) {
-			oData.query.results = validateInfo(oData.query.results);
-			oInfo = simplifyInfo(oData.query.results);
-			oFetchedInfo = oInfo;
-			createGraph(oFetchedInfo);
+			if (!"error" in oData) {
+				oData.query.results = validateInfo(oData.query.results);
+				oInfo = simplifyInfo(oData.query.results);
+				oFetchedInfo = oInfo;
+				createGraph(oFetchedInfo);
+			} else {
+				oInfo = validateInfo(null);
+				oInfo = simplifyInfo(oInfo);
+				oFetchedInfo = oInfo;
+				createGraph(oFetchedInfo);
+			}
 		},
 		error: function() {
 			showError();
@@ -170,12 +212,15 @@ function getInfo() {
 }
 
 function showError() {
-	var oContent = d3.select("#idContent");
+	var oErrorRow = $("#idError");
 
 	var oErrorDiv = $("<div>", {
-		innerHTML: "Error: Failed to make data request. Please check to see if https://feheroes.gamepedia.com responds."
+		class: "col",
+		html: "Error: Failed to make data request. Please check to see if https://feheroes.gamepedia.com responds.",
+		style: "text-align: left"
 	});
-	oContent.append(oErrorDiv);
+	oErrorRow[0].hidden = false;
+	oErrorRow.append(oErrorDiv);
 }
 
 function simplifyInfo(oInfo) {
@@ -566,8 +611,30 @@ function disableFilters(iTimeToDisable) {
 }
 
 function validateInfo(oResults) {
-	if (!oResults.Abel.printouts["Has Lv40 R5 HP Neut"][0]) {
+	if (!oResults) {
 		// Create dummy data
+		oResults = oDummyResults;
+		// oResults = {
+		// 	"Abel" : {
+		// 		"printouts" : {
+		// 			"Has Lv40 R5 HP Neut" : 15,
+		// 			"Has Lv40 R5 ATK Neut" : 15,
+		// 			"Has Lv40 R5 SPD Neut" : 15,
+		// 			"Has Lv40 R5 DEF Neut" : 15,
+		// 			"Has Lv40 R5 RES Neut" : 15
+		// 		}
+		// 	}
+		// }
+		Object.keys(oResults).forEach(function (hero) {
+			oResults[hero].printouts = {
+				"Has Lv40 R5 HP Neut" : 0,
+				"Has Lv40 R5 ATK Neut" : 0,
+				"Has Lv40 R5 SPD Neut" : 0,
+				"Has Lv40 R5 DEF Neut" : 0,
+				"Has Lv40 R5 RES Neut" : 0
+			};
+		});
+
 		Object.keys(oResults).forEach(function (hero) {
 			Object.keys(oResults[hero].printouts).forEach(function (stat) {
 				oResults[hero].printouts[stat] = [Math.floor((Math.random() * 40) + 30)];
